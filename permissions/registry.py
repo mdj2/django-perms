@@ -271,6 +271,9 @@ class PermissionsRegistry:
             elif not callable(view):
                 raise PermissionsError('Bad call to permissions decorator')
 
+            # add an attribute to the view to facilitate unit testing
+            view.permission_function = perm_func
+
             # When a permission is applied to a class, which is presumed
             # to be a class-based view, instead apply the permission to
             # the class's dispatch() method. This will effectively

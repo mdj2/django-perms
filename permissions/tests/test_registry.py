@@ -186,3 +186,14 @@ class TestRegistry(TestCase):
         self.assertFalse(handler.called)
         view(request, 1)
         self.assertTrue(handler.called)
+
+    def test_permission_function_attribute_is_added_to_view(self):
+        @self.registry.register
+        def perm(user):
+            pass
+
+        @self.registry.require("perm")
+        def view(request):
+            pass
+
+        self.assertEqual(view.permission_function, perm)
