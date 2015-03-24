@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AnonymousUser, User
 from django.core.exceptions import PermissionDenied
+from django.views.generic import View
 
 from permissions import PermissionsRegistry
 from permissions.exc import NoSuchPermissionError, PermissionsError
@@ -186,3 +187,37 @@ class TestRegistry(TestCase):
         self.assertFalse(handler.called)
         view(request, 1)
         self.assertTrue(handler.called)
+
+    def test_view_to_permission_mapping(self):
+        """
+        When a permission is applied to a view, the registry should save the
+        (view, permission_function) pair as a map. This makes it easier to
+        unit test the view, so you can ensure it was decorated with the right
+        permission function.
+        """
+
+        @self.registry.register
+        def perm(user):
+            pass
+
+        @self.registry.require("perm")
+        def view(request):
+            pass
+
+        self.assertEqual(self.registry.permission_of[view], perm)
+
+        # try the same thing with a CBV
+        @self.registry.require("perm")
+        class AView(View):
+            def get(self, request):
+                pass
+
+        self.assertEqual(self.registry.permission_of[AView], perm)
+
+        # same thing with the permission on a CBV method
+        class AnotherView(View):
+            @self.registry.require("perm")
+            def get(self, request):
+                pass
+
+        self.assertEqual(self.registry.permission_of[AnotherView.get], perm)

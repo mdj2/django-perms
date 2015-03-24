@@ -122,6 +122,11 @@ class PermissionsRegistry:
                  unauthenticated_handler=None, request_types=None):
         self._registry = dict()
 
+        # this allows us to inspect the registry and determine which view has
+        # which permission function applied. It is a mapping of a view to a
+        # permission function
+        self.permission_of = dict()
+
         settings = DEFAULT_SETTINGS.copy()
         if hasattr(django.conf.settings, 'PERMISSIONS'):
             settings.update(django.conf.settings.PERMISSIONS)
@@ -289,6 +294,7 @@ class PermissionsRegistry:
             # below are reached, we decorate MyView.dispatch() and
             # then return MyView.
             if isinstance(view, type):
+                self.permission_of[view] = perm_func
                 view.dispatch = view_decorator(view.dispatch, field)
                 return view
 
@@ -379,6 +385,7 @@ class PermissionsRegistry:
                         'The "{0}" permission is required to access this resource'
                         .format(perm_name))
 
+            self.permission_of[wrapper] = perm_func
             return wrapper
         return view_decorator
 
