@@ -217,9 +217,12 @@ class PermissionsRegistry:
         def filter_func(user, instance=NO_VALUE):
             test = lambda: perm_func(user) if instance is NO_VALUE else perm_func(user, instance)
             return (
-                allow_staff and user.is_staff or
-                allow_superuser and user.is_superuser or
-                test()
+                user and
+                (user.is_authenticated() or allow_anonymous) and (
+                    (allow_staff and user.is_staff) or
+                    (allow_superuser and user.is_superuser) or
+                    test()
+                )
             )
 
         register.filter(name, filter_func)

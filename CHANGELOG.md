@@ -7,6 +7,12 @@
   should be decorated using `@permissions.require('perm_name')` instead of
   `@permissions.perm_name`.
 
+## [1.1.1] - 2015-05-13
+
+### Fixed
+- Template filters now bypass the call to the permission function when passed a
+  falsy value or an AnonymousUser object (unless allow_anonymous is set)
+
 ## [1.1.0] - 2015-03-27
 
 ### Fixed
